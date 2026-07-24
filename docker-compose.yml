@@ -1,0 +1,33 @@
+services:
+
+  postgres:
+    image: postgres:17
+    container_name: novadesk-postgres
+    restart: always
+
+    environment:
+      POSTGRES_DB: novadesk
+      POSTGRES_USER: novadesk_user
+      POSTGRES_PASSWORD: novadesk_password
+
+    ports:
+      - "${POSTGRES_PORT}:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: novadesk-pgadmin
+
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@novadesk.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+
+    ports:
+      - "5050:80"
+
+
+volumes:
+  postgres_data:
