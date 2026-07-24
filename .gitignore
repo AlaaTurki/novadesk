@@ -1,0 +1,22 @@
+# Java
+*.class
+target/
+.mvn/
+
+# IntelliJ
+.idea/
+*.iml
+
+# Angular
+node_modules/
+dist/
+
+# Environment
+.env
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
