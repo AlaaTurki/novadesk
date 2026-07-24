@@ -1,20 +1,34 @@
 package com.alaaturki.novadesk.entity;
 
-import com.alaaturki.novadesk.enums.RoleType;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
+
+@Entity
+@Table(name="roles")
 @Getter
 @Setter
 @NoArgsConstructor
-@Entity
-@Table(name = "roles")
-public class Role extends BaseEntity {
+@AllArgsConstructor
+@Builder
+public class Role {
 
-    @Enumerated(EnumType.STRING)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
+
     @Column(nullable = false, unique = true)
-    private RoleType name;
+    private String name;
+
+
+    @ManyToMany(mappedBy = "roles")
+    @Builder.Default
+    private Set<User> users = new HashSet<>();
 
 }

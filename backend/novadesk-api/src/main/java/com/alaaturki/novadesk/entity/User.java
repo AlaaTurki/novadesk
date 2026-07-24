@@ -1,34 +1,47 @@
 package com.alaaturki.novadesk.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
+
+@Entity
+@Table(name = "users")
 @Getter
 @Setter
 @NoArgsConstructor
-@Entity
-@Table(name = "users")
-public class User extends BaseEntity {
+@AllArgsConstructor
+@Builder
+public class User {
 
-    @Column(nullable = false)
-    private String firstName;
 
-    @Column(nullable = false)
-    private String lastName;
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
+
+    @Column(nullable = false, unique = true)
+    private String username;
+
 
     @Column(nullable = false, unique = true)
     private String email;
 
+
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
-    private boolean enabled = true;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "role_id")
-    private Role role;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    @Builder.Default
+    private Set<Role> roles = new HashSet<>();
 
 }

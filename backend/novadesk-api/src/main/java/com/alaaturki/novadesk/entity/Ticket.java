@@ -1,43 +1,56 @@
 package com.alaaturki.novadesk.entity;
 
-import com.alaaturki.novadesk.enums.TicketPriority;
-import com.alaaturki.novadesk.enums.TicketStatus;
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
+import jakarta.persistence.*;
+import lombok.*;
+import com.alaaturki.novadesk.enums.TicketStatus;
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+
+@Entity
+@Table(name="tickets")
 @Getter
 @Setter
 @NoArgsConstructor
-@Entity
-@Table(name = "tickets")
-public class Ticket extends BaseEntity {
+@AllArgsConstructor
+@Builder
+public class Ticket {
+
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
 
     @Column(nullable = false)
     private String title;
 
+
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private TicketStatus status = TicketStatus.OPEN;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private TicketPriority priority = TicketPriority.MEDIUM;
+    private TicketStatus status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "creator_id")
-    private User creator;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "assignee_id")
-    private User assignee;
+    private LocalDateTime createdAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    private Category category;
+
+    @ManyToOne
+    @JoinColumn(name="created_by")
+    private User createdBy;
+
+
+
+    @PrePersist
+    public void prePersist(){
+        createdAt = LocalDateTime.now();
+
+        if(status == null){
+            status = TicketStatus.OPEN;
+        }
+    }
 
 }
