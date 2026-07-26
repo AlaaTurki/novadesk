@@ -1,3 +1,6 @@
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+
 CREATE TABLE roles (
     id UUID PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE,
@@ -11,11 +14,23 @@ CREATE TABLE users (
     username VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    role_id UUID,
-    created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL,
 
-    CONSTRAINT fk_user_role
-        FOREIGN KEY (role_id)
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL
+);
+
+
+CREATE TABLE user_roles (
+    user_id UUID NOT NULL,
+    role_id UUID NOT NULL,
+
+    PRIMARY KEY(user_id, role_id),
+
+    CONSTRAINT fk_user_roles_user
+        FOREIGN KEY(user_id)
+        REFERENCES users(id),
+
+    CONSTRAINT fk_user_roles_role
+        FOREIGN KEY(role_id)
         REFERENCES roles(id)
 );
