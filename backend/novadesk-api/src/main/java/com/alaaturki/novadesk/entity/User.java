@@ -1,11 +1,8 @@
 package com.alaaturki.novadesk.entity;
 
+
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
 
 
 @Entity
@@ -14,34 +11,32 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class User {
+public class User extends BaseEntity {
 
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
-
-
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String username;
 
 
-    @Column(nullable = false, unique = true)
+
+    @Column(
+            unique = true,
+            nullable = false
+    )
     private String email;
+
 
 
     @Column(nullable = false)
     private String password;
 
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(
+            name = "role_id"
     )
-    @Builder.Default
-    private Set<Role> roles = new HashSet<>();
+    private Role role;
+
 
 }

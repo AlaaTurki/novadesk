@@ -1,9 +1,14 @@
 package com.alaaturki.novadesk.security;
 
 
-import io.jsonwebtoken.*;
+import com.alaaturki.novadesk.entity.User;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 
@@ -11,46 +16,65 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 
 
+
 @Service
 public class JwtService {
 
 
-    private final SecretKey key;
-
-    private final long expiration;
-
-
-    public JwtService(
-            @Value("${jwt.secret}") String secret,
-            @Value("${jwt.expiration}") long expiration
-    ){
-
-        this.key = Keys.hmacShaKeyFor(secret.getBytes());
-        this.expiration = expiration;
-
-    }
+    @Value("${jwt.secret}")
+    private String secret;
 
 
-    public String generateToken(String email){
+    private final long expiration = 86400000; // 24h
+
+
+
+    public String generateToken(User user) {
 
 
         return Jwts.builder()
-                .subject(email)
+                .subject(user.getEmail())
                 .issuedAt(new Date())
                 .expiration(
-                        new Date(System.currentTimeMillis()+expiration)
+                        new Date(System.currentTimeMillis() + expiration)
                 )
-                .signWith(key)
+                .signWith(getSigningKey())
+                .compact();
+
+    }
+
+    public String generateToken(UserDetails userDetails) {
+
+
+        return Jwts.builder()
+                .subject(userDetails.getUsername())
+                .issuedAt(new Date())
+                .expiration(
+                        new Date(System.currentTimeMillis() + expiration)
+                )
+                .signWith(getSigningKey())
                 .compact();
 
     }
 
 
 
-    public String extractEmail(String token){
+    private SecretKey getSigningKey() {
+
+        byte[] keyBytes =
+                Decoders.BASE64.decode(secret);
+
+        return Keys.hmacShaKeyFor(keyBytes);
+
+    }
+
+
+
+    public String extractUsername(String token) {
+
 
         return Jwts.parser()
-                .verifyWith(key)
+                .verifyWith(getSigningKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload()
@@ -59,5 +83,16 @@ public class JwtService {
     }
 
 
+
+    public boolean isTokenValid(
+            String token,
+            UserDetails userDetails
+    ) {
+
+        String username = extractUsername(token);
+
+        return username.equals(userDetails.getUsername());
+
+    }
 
 }
