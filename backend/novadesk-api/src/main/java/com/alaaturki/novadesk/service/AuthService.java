@@ -1,10 +1,6 @@
 package com.alaaturki.novadesk.service;
 
-
-import com.alaaturki.novadesk.dto.LoginRequest;
-import com.alaaturki.novadesk.dto.LoginResponse;
-import com.alaaturki.novadesk.dto.RegisterRequest;
-import com.alaaturki.novadesk.dto.RegisterResponse;
+import com.alaaturki.novadesk.dto.*;
 import com.alaaturki.novadesk.entity.Role;
 import com.alaaturki.novadesk.entity.User;
 import com.alaaturki.novadesk.repository.RoleRepository;
@@ -12,6 +8,9 @@ import com.alaaturki.novadesk.repository.UserRepository;
 import com.alaaturki.novadesk.security.JwtService;
 
 import lombok.RequiredArgsConstructor;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,26 +23,32 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
 
+    private static final Logger log =
+            LoggerFactory.getLogger(AuthService.class);
+
+
     private final UserRepository userRepository;
-
     private final RoleRepository roleRepository;
-
     private final PasswordEncoder passwordEncoder;
-
     private final JwtService jwtService;
-
     private final AuthenticationManager authenticationManager;
 
 
 
-    // =========================
-    // REGISTER
-    // =========================
-
     public RegisterResponse register(RegisterRequest request) {
 
 
-        if (userRepository.existsByEmail(request.getEmail())) {
+        log.info("Register attempt email={} username={}",
+                request.getEmail(),
+                request.getUsername());
+
+
+        if(userRepository.existsByEmail(request.getEmail())) {
+
+            log.warn(
+                    "Register failed: email already exists {}",
+                    request.getEmail()
+            );
 
             throw new RuntimeException(
                     "Email already exists"
@@ -51,45 +56,59 @@ public class AuthService {
         }
 
 
+        if(userRepository.existsByUsername(request.getUsername())) {
 
-        Role userRole = roleRepository
+
+            log.warn(
+                    "Register failed: username already exists {}",
+                    request.getUsername()
+            );
+
+
+            throw new RuntimeException(
+                    "Username already exists"
+            );
+        }
+
+
+
+        Role role = roleRepository
                 .findByName("USER")
-                .orElseThrow(
-                        () -> new RuntimeException(
+                .orElseThrow(() ->
+                        new RuntimeException(
                                 "USER role not found"
                         )
                 );
 
 
 
-        User user = new User();
+        User user = User.builder()
 
+                .username(request.getUsername())
 
-        user.setUsername(
-                request.getUsername()
-        );
+                .email(request.getEmail())
 
-
-        user.setEmail(
-                request.getEmail()
-        );
-
-
-        user.setPassword(
-                passwordEncoder.encode(
-                        request.getPassword()
+                .password(
+                        passwordEncoder.encode(
+                                request.getPassword()
+                        )
                 )
-        );
 
+                .role(role)
 
-        user.setRole(
-                userRole
-        );
+                .build();
 
 
 
         User savedUser =
                 userRepository.save(user);
+
+
+
+        log.info(
+                "User created successfully id={}",
+                savedUser.getId()
+        );
 
 
 
@@ -99,15 +118,10 @@ public class AuthService {
 
 
         return new RegisterResponse(
-
                 savedUser.getId(),
-
                 savedUser.getUsername(),
-
                 savedUser.getEmail(),
-
                 token
-
         );
 
     }
@@ -115,33 +129,52 @@ public class AuthService {
 
 
 
-    // =========================
-    // LOGIN
-    // =========================
-
     public LoginResponse login(LoginRequest request) {
 
 
-
-        authenticationManager.authenticate(
-
-                new UsernamePasswordAuthenticationToken(
-
-                        request.getEmail(),
-
-                        request.getPassword()
-
-                )
-
+        log.info(
+                "Login attempt email={}",
+                request.getEmail()
         );
+
+
+        try {
+
+
+            authenticationManager.authenticate(
+
+                    new UsernamePasswordAuthenticationToken(
+
+                            request.getEmail(),
+
+                            request.getPassword()
+                    )
+            );
+
+
+        } catch(Exception e) {
+
+
+            log.error(
+                    "Login failed for email={} reason={}",
+                    request.getEmail(),
+                    e.getMessage()
+            );
+
+
+            throw new RuntimeException(
+                    "Invalid email or password"
+            );
+
+        }
 
 
 
         User user =
                 userRepository
                         .findByEmail(request.getEmail())
-                        .orElseThrow(
-                                () -> new RuntimeException(
+                        .orElseThrow(() ->
+                                new RuntimeException(
                                         "User not found"
                                 )
                         );
@@ -150,6 +183,13 @@ public class AuthService {
 
         String token =
                 jwtService.generateToken(user);
+
+
+
+        log.info(
+                "Login successful user={}",
+                user.getUsername()
+        );
 
 
 
@@ -162,10 +202,8 @@ public class AuthService {
                 user.getEmail(),
 
                 token
-
         );
 
     }
-
 
 }

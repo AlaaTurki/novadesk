@@ -1,6 +1,5 @@
 package com.alaaturki.novadesk.repository;
 
-
 import com.alaaturki.novadesk.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -16,5 +15,8 @@ public interface UserRepository
 
 
     boolean existsByEmail(String email);
+
+
+    boolean existsByUsername(String username);
 
 }
