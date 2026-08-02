@@ -3,8 +3,16 @@ package com.alaaturki.novadesk.controller;
 
 import com.alaaturki.novadesk.dto.*;
 import com.alaaturki.novadesk.service.AuthService;
+
+
+import jakarta.validation.Valid;
+
+
 import lombok.RequiredArgsConstructor;
+
+
 import org.springframework.web.bind.annotation.*;
+
 
 
 @RestController
@@ -13,12 +21,18 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
 
+
     private final AuthService authService;
+
+
 
 
     @PostMapping("/register")
     public RegisterResponse register(
+
+            @Valid
             @RequestBody RegisterRequest request
+
     ){
 
         return authService.register(request);
@@ -26,13 +40,18 @@ public class AuthController {
     }
 
 
+
+
     @PostMapping("/login")
     public LoginResponse login(
+
             @RequestBody LoginRequest request
+
     ){
 
         return authService.login(request);
 
     }
+
 
 }
