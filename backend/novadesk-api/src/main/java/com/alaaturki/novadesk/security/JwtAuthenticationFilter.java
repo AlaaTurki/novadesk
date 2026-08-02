@@ -1,41 +1,37 @@
 package com.alaaturki.novadesk.security;
 
-
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-
 import lombok.RequiredArgsConstructor;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import org.springframework.security.core.userdetails.UserDetails;
-
 import org.springframework.security.core.userdetails.UserDetailsService;
-
 
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 
-
 import org.springframework.stereotype.Component;
 
-
 import org.springframework.web.filter.OncePerRequestFilter;
-
 
 import java.io.IOException;
 
 
-
 @Component
 @RequiredArgsConstructor
-public class JwtAuthenticationFilter
-        extends OncePerRequestFilter {
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+
+    private static final Logger log =
+            LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
 
     private final JwtService jwtService;
@@ -53,17 +49,19 @@ public class JwtAuthenticationFilter
             throws ServletException, IOException {
 
 
-
         String path = request.getServletPath();
 
 
+        log.info("Request path : {}", path);
 
-        // ignore login/register
+
+
         if(path.startsWith("/api/auth")){
+
+            log.info("Auth endpoint - skipping JWT");
 
             filterChain.doFilter(request,response);
             return;
-
         }
 
 
@@ -73,21 +71,17 @@ public class JwtAuthenticationFilter
 
 
 
+        log.info("Authorization Header : {}", authHeader);
+
+
+
         if(authHeader == null ||
                 !authHeader.startsWith("Bearer ")){
 
-            System.out.println(
-                    "No JWT token found"
-            );
+            log.warn("No JWT token found");
 
-
-            filterChain.doFilter(
-                    request,
-                    response
-            );
-
+            filterChain.doFilter(request,response);
             return;
-
         }
 
 
@@ -105,8 +99,9 @@ public class JwtAuthenticationFilter
 
 
 
-            System.out.println(
-                    "JWT email = " + email
+            log.info(
+                    "JWT username/email : {}",
+                    email
             );
 
 
@@ -121,13 +116,6 @@ public class JwtAuthenticationFilter
                 UserDetails userDetails =
                         userDetailsService
                                 .loadUserByUsername(email);
-
-
-
-                System.out.println(
-                        "User found : "
-                                + userDetails.getUsername()
-                );
 
 
 
@@ -159,8 +147,17 @@ public class JwtAuthenticationFilter
 
 
 
-                    System.out.println(
-                            "JWT Authentication SUCCESS"
+                    log.info(
+                            "JWT Authentication SUCCESS for {}",
+                            email
+                    );
+
+
+                }
+                else {
+
+                    log.warn(
+                            "Invalid JWT token"
                     );
 
                 }
@@ -168,14 +165,12 @@ public class JwtAuthenticationFilter
             }
 
 
-
         }
         catch(Exception e){
 
-
-            System.out.println(
-                    "JWT ERROR : "
-                            + e.getMessage()
+            log.error(
+                    "JWT Error : {}",
+                    e.getMessage()
             );
 
         }
@@ -188,6 +183,5 @@ public class JwtAuthenticationFilter
         );
 
     }
-
 
 }
