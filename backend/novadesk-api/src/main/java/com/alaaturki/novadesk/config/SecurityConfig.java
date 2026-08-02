@@ -3,22 +3,30 @@ package com.alaaturki.novadesk.config;
 
 import com.alaaturki.novadesk.security.JwtAuthenticationFilter;
 
+
 import lombok.RequiredArgsConstructor;
+
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 
 import org.springframework.security.authentication.AuthenticationManager;
 
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 
+
 import org.springframework.security.config.http.SessionCreationPolicy;
+
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
+
 
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -28,10 +36,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @RequiredArgsConstructor
+@EnableMethodSecurity
 public class SecurityConfig {
 
 
+
     private final JwtAuthenticationFilter jwtFilter;
+
 
 
 
@@ -42,55 +53,70 @@ public class SecurityConfig {
             throws Exception {
 
 
+
         return http
 
-                .csrf(csrf ->
-                        csrf.disable()
+                .csrf(
+                        csrf -> csrf.disable()
                 )
 
 
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(
-                                SessionCreationPolicy.STATELESS
-                        )
+                .sessionManagement(
+                        session ->
+                                session.sessionCreationPolicy(
+                                        SessionCreationPolicy.STATELESS
+                                )
                 )
 
 
-                .authorizeHttpRequests(auth -> auth
+                .authorizeHttpRequests(
+                        auth -> auth
 
 
-                        .requestMatchers(
-                                "/api/auth/**"
-                        )
-                        .permitAll()
+                                .requestMatchers(
+                                        "/api/auth/**"
+                                )
+                                .permitAll()
 
 
-                        .requestMatchers(
-                                "/api/test/**"
-                        )
-                        .authenticated()
+
+                                .requestMatchers(
+                                        "/api/admin/**"
+                                )
+                                .hasRole("ADMIN")
 
 
-                        .anyRequest()
-                        .authenticated()
+
+                                .requestMatchers("/api/users/**")
+                                .hasRole("ADMIN")
+
+
+                                .anyRequest()
+                                .authenticated()
 
                 )
 
 
                 .addFilterBefore(
+
                         jwtFilter,
+
                         UsernamePasswordAuthenticationFilter.class
+
                 )
 
 
                 .build();
 
+
     }
 
 
 
+
+
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    PasswordEncoder passwordEncoder(){
 
         return new BCryptPasswordEncoder();
 
@@ -98,8 +124,10 @@ public class SecurityConfig {
 
 
 
+
+
     @Bean
-    public AuthenticationManager authenticationManager(
+    AuthenticationManager authenticationManager(
             AuthenticationConfiguration configuration
     )
             throws Exception {
@@ -108,5 +136,6 @@ public class SecurityConfig {
         return configuration.getAuthenticationManager();
 
     }
+
 
 }

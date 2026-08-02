@@ -3,6 +3,7 @@ package com.alaaturki.novadesk.service;
 import com.alaaturki.novadesk.dto.*;
 import com.alaaturki.novadesk.entity.Role;
 import com.alaaturki.novadesk.entity.User;
+import com.alaaturki.novadesk.exception.BadRequestException;
 import com.alaaturki.novadesk.repository.RoleRepository;
 import com.alaaturki.novadesk.repository.UserRepository;
 import com.alaaturki.novadesk.security.JwtService;
@@ -50,7 +51,7 @@ public class AuthService {
                     request.getEmail()
             );
 
-            throw new RuntimeException(
+            throw new BadRequestException(
                     "Email already exists"
             );
         }

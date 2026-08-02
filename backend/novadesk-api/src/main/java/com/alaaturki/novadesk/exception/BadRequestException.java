@@ -1,11 +1,11 @@
 package com.alaaturki.novadesk.exception;
 
 
-public class ResourceNotFoundException
+public class BadRequestException
         extends RuntimeException {
 
 
-    public ResourceNotFoundException(String message){
+    public BadRequestException(String message){
 
         super(message);
 

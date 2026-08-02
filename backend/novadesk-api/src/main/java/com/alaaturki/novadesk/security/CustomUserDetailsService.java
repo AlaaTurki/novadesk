@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 
 
 import org.springframework.security.core.userdetails.*;
+
 import org.springframework.stereotype.Service;
 
 
@@ -24,16 +25,24 @@ public class CustomUserDetailsService
 
 
     @Override
-    public UserDetails loadUserByUsername(String email)
+    public UserDetails loadUserByUsername(
+            String email
+    )
             throws UsernameNotFoundException {
 
 
-        return repository.findByEmail(email)
 
-                .orElseThrow(() ->
-                        new UsernameNotFoundException(
-                                "User not found"
+        return repository
+                .findByEmail(email)
+
+                .orElseThrow(
+
+                        () -> new UsernameNotFoundException(
+                                "User not found : "
+                                        +
+                                        email
                         )
+
                 );
 
     }
