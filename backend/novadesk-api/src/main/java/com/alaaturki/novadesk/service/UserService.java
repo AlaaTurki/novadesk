@@ -4,6 +4,7 @@ package com.alaaturki.novadesk.service;
 import com.alaaturki.novadesk.dto.user.*;
 import com.alaaturki.novadesk.entity.Role;
 import com.alaaturki.novadesk.entity.User;
+import com.alaaturki.novadesk.mapper.UserMapper;
 import com.alaaturki.novadesk.repository.RoleRepository;
 import com.alaaturki.novadesk.repository.UserRepository;
 
@@ -28,9 +29,13 @@ public class UserService {
 
     private final PasswordEncoder passwordEncoder;
 
+    private final UserMapper mapper;
 
 
-    public UserResponse create(CreateUserRequest request){
+
+    public UserResponse create(
+            CreateUserRequest request
+    ){
 
 
         if(userRepository.existsByEmail(request.getEmail())){
@@ -38,6 +43,7 @@ public class UserService {
             throw new RuntimeException(
                     "Email already exists"
             );
+
         }
 
 
@@ -46,47 +52,43 @@ public class UserService {
             throw new RuntimeException(
                     "Username already exists"
             );
+
         }
 
 
 
         Role role =
-                roleRepository
-                        .findByName(request.getRole())
+                roleRepository.findByName(
+                                request.getRole()
+                                        .toUpperCase()
+                        )
                         .orElseThrow(
-                                () ->
-                                        new RuntimeException(
-                                                "Role not found"
-                                        )
+                                () -> new RuntimeException(
+                                        "Role not found"
+                                )
                         );
 
 
 
-        User user = new User();
+        User user = User.builder()
 
+                .username(request.getUsername())
 
-        user.setUsername(
-                request.getUsername()
-        );
+                .email(request.getEmail())
 
-
-        user.setEmail(
-                request.getEmail()
-        );
-
-
-        user.setPassword(
-                passwordEncoder.encode(
-                        request.getPassword()
+                .password(
+                        passwordEncoder.encode(
+                                request.getPassword()
+                        )
                 )
-        );
+
+                .role(role)
+
+                .build();
 
 
-        user.setRole(role);
 
-
-
-        return map(
+        return mapper.toResponse(
                 userRepository.save(user)
         );
 
@@ -94,34 +96,42 @@ public class UserService {
 
 
 
+
     public List<UserResponse> findAll(){
 
-
         return userRepository.findAll()
+
                 .stream()
-                .map(this::map)
+
+                .map(mapper::toResponse)
+
                 .toList();
 
     }
 
 
 
-    public UserResponse findById(UUID id){
+
+    public UserResponse findById(
+            UUID id
+    ){
 
 
         User user =
                 userRepository.findById(id)
+
                         .orElseThrow(
-                                ()->
-                                        new RuntimeException(
-                                                "User not found"
-                                        )
+                                () -> new RuntimeException(
+                                        "User not found"
+                                )
                         );
 
 
-        return map(user);
+        return mapper.toResponse(user);
 
     }
+
+
 
 
 
@@ -133,21 +143,33 @@ public class UserService {
 
         User user =
                 userRepository.findById(id)
-                        .orElseThrow();
+
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "User not found"
+                                )
+                        );
 
 
 
         Role role =
-                roleRepository
-                        .findByName(request.getRole())
-                        .orElseThrow();
+                roleRepository.findByName(
+                                request.getRole()
+                                        .toUpperCase()
+                        )
 
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "Role not found"
+                                )
+                        );
 
 
         user.setRole(role);
 
 
-        return map(
+
+        return mapper.toResponse(
                 userRepository.save(user)
         );
 
@@ -155,33 +177,22 @@ public class UserService {
 
 
 
-    public void delete(UUID id){
+
+    public void delete(
+            UUID id
+    ){
+
+
+        if(!userRepository.existsById(id)){
+
+            throw new RuntimeException(
+                    "User not found"
+            );
+
+        }
 
 
         userRepository.deleteById(id);
-
-    }
-
-
-
-
-
-    private UserResponse map(User user){
-
-
-        return UserResponse.builder()
-
-                .id(user.getId())
-
-                .username(user.getUsername())
-
-                .email(user.getEmail())
-
-                .role(
-                        user.getRole().getName()
-                )
-
-                .build();
 
     }
 

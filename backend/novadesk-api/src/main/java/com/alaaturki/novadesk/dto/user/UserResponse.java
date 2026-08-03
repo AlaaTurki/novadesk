@@ -1,14 +1,16 @@
 package com.alaaturki.novadesk.dto.user;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class UserResponse {
-
 
     private UUID id;
 
@@ -17,5 +19,9 @@ public class UserResponse {
     private String email;
 
     private String role;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
 
 }
