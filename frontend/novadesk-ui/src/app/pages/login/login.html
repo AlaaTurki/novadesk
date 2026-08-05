@@ -1,0 +1,218 @@
+<div class="login-container">
+
+
+  <mat-card class="login-card">
+
+
+    <mat-card-header>
+
+      <mat-card-title>
+        NovaDesk
+      </mat-card-title>
+
+      <mat-card-subtitle>
+        Login to your account
+      </mat-card-subtitle>
+
+    </mat-card-header>
+
+
+
+    <mat-card-content>
+
+
+      <form
+        (ngSubmit)="submit()"
+      >
+
+
+
+        <!-- Email -->
+
+        <mat-form-field
+          appearance="outline"
+        >
+
+          <mat-label>
+            Email
+          </mat-label>
+
+
+          <input
+
+            matInput
+
+            type="email"
+
+            name="email"
+
+            autocomplete="email"
+
+            [(ngModel)]="email"
+
+            required
+
+          >
+
+
+          <mat-icon matSuffix>
+            email
+          </mat-icon>
+
+
+        </mat-form-field>
+
+
+
+
+        <!-- Password -->
+
+        <mat-form-field
+          appearance="outline"
+        >
+
+
+          <mat-label>
+            Password
+          </mat-label>
+
+
+          <input
+
+            matInput
+
+            name="password"
+
+            [type]="
+              hidePassword
+              ? 'password'
+              : 'text'
+            "
+
+            autocomplete="current-password"
+
+            [(ngModel)]="password"
+
+            required
+
+          >
+
+
+
+          <button
+
+            mat-icon-button
+
+            matSuffix
+
+            type="button"
+
+            (click)="hidePassword = !hidePassword"
+
+          >
+
+            <mat-icon>
+
+              {{
+                hidePassword
+                ? 'visibility'
+                : 'visibility_off'
+              }}
+
+            </mat-icon>
+
+
+          </button>
+
+
+
+        </mat-form-field>
+
+
+
+
+        <!-- Error -->
+
+        <div
+
+          class="error"
+
+          *ngIf="errorMessage"
+
+        >
+
+          {{errorMessage}}
+
+
+        </div>
+
+
+
+
+        <!-- Submit -->
+
+        <button
+
+          mat-raised-button
+
+          color="primary"
+
+          type="submit"
+
+          [disabled]="loading"
+
+        >
+
+
+          <span *ngIf="!loading">
+
+            Login
+
+          </span>
+
+
+          <span *ngIf="loading">
+
+            Loading...
+
+          </span>
+
+
+
+        </button>
+
+
+
+      </form>
+
+
+
+    </mat-card-content>
+
+
+
+    <mat-card-actions>
+
+
+      <a
+
+        mat-button
+
+        routerLink="/register"
+
+      >
+
+        Create account
+
+      </a>
+
+
+    </mat-card-actions>
+
+
+
+  </mat-card>
+
+
+
+</div>
