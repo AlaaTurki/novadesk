@@ -1,107 +1,84 @@
-import {
-  Component
-} from '@angular/core';
-
-import {
-  MatCardModule
-} from '@angular/material/card';
-
-import {
-  CommonModule
-} from '@angular/common';
+import { Component, OnInit } from '@angular/core';
 
 
-import {
-  HttpClient
-} from '@angular/common/http';
+import { CommonModule } from '@angular/common';
 
+
+import { DashboardService } from '../../core/services/dashboard';
+
+
+import { DashboardUser } from '../../core/models/dashboard-user';
+
+
+import { MatTableModule } from '@angular/material/table';
 
 
 @Component({
 
-  selector: 'app-dashboard',
+selector:'app-dashboard',
 
-  standalone: true,
+standalone:true,
 
-  imports:[
 
- CommonModule,
+imports:[
 
- MatCardModule
+CommonModule,
+
+MatTableModule
 
 ],
 
-  templateUrl: './dashboard.html',
 
-  styleUrl: './dashboard.scss'
+templateUrl:'./dashboard.html',
+
+styleUrl:'./dashboard.scss'
 
 })
-export class Dashboard {
-
-
-  message = '';
-
-  users:any[] = [];
+export class Dashboard implements OnInit {
 
 
 
-  constructor(
-
-    private http: HttpClient
-
-  ){}
+users:DashboardUser[]=[];
 
 
 
-  ngOnInit(){
+displayedColumns=[
+
+'username',
+
+'email',
+
+'role'
+
+];
 
 
-    this.http.get<any[]>(
 
-      'http://localhost:8080/api/users'
-
-    )
-
-    .subscribe({
+constructor(
+private dashboardService:DashboardService
+){}
 
 
-      next:(response)=>{
+
+ngOnInit(){
 
 
-        console.log(
-          'Users:',
-          response
-        );
+this.dashboardService.getUsers()
+
+.subscribe({
+
+next:data=>{
+
+this.users=data;
+
+}
 
 
-        this.users = response;
-
-        this.message =
-          'JWT authentication works';
+});
 
 
-      },
+}
 
-
-      error:(error)=>{
-
-
-        console.error(
-          error
-        );
-
-
-        this.message =
-          'Error loading users';
-
-
-      }
-
-
-    });
-
-
-  }
 
 
 }

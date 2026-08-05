@@ -1,1 +1,24 @@
-<p>users works!</p>
+<div class="toolbar">
+
+    <mat-form-field appearance="outline">
+
+        <mat-label>Search users</mat-label>
+
+        <input
+            matInput
+            placeholder="Search..."
+            (keyup)="applyFilter($event)">
+
+    </mat-form-field>
+
+    <button
+        mat-raised-button
+        color="primary">
+
+        <mat-icon>person_add</mat-icon>
+
+        New User
+
+    </button>
+
+</div>
