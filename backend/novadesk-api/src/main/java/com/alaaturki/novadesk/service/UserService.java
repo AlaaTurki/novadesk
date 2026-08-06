@@ -8,6 +8,7 @@ import com.alaaturki.novadesk.mapper.UserMapper;
 import com.alaaturki.novadesk.repository.RoleRepository;
 import com.alaaturki.novadesk.repository.UserRepository;
 
+
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,9 +19,11 @@ import java.util.List;
 import java.util.UUID;
 
 
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
+
 
 
     private final UserRepository userRepository;
@@ -32,6 +35,12 @@ public class UserService {
     private final UserMapper mapper;
 
 
+
+
+
+    /*
+        CREATE USER
+     */
 
     public UserResponse create(
             CreateUserRequest request
@@ -45,6 +54,7 @@ public class UserService {
             );
 
         }
+
 
 
         if(userRepository.existsByUsername(request.getUsername())){
@@ -70,11 +80,16 @@ public class UserService {
 
 
 
+
         User user = User.builder()
 
-                .username(request.getUsername())
+                .username(
+                        request.getUsername()
+                )
 
-                .email(request.getEmail())
+                .email(
+                        request.getEmail()
+                )
 
                 .password(
                         passwordEncoder.encode(
@@ -88,16 +103,27 @@ public class UserService {
 
 
 
-        return mapper.toResponse(
-                userRepository.save(user)
-        );
+        User saved =
+                userRepository.save(user);
+
+
+
+        return mapper.toResponse(saved);
 
     }
 
 
 
 
+
+
+
+    /*
+        GET ALL USERS
+     */
+
     public List<UserResponse> findAll(){
+
 
         return userRepository.findAll()
 
@@ -111,6 +137,14 @@ public class UserService {
 
 
 
+
+
+
+
+
+    /*
+        GET USER BY ID
+     */
 
     public UserResponse findById(
             UUID id
@@ -127,6 +161,7 @@ public class UserService {
                         );
 
 
+
         return mapper.toResponse(user);
 
     }
@@ -135,11 +170,89 @@ public class UserService {
 
 
 
+
+
+
+    /*
+        UPDATE USER INFORMATION
+     */
+
+    public UserResponse update(
+            UUID id,
+            UpdateUserRequest request
+    ){
+
+        User user =
+                userRepository.findById(id)
+
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "User not found"
+                                )
+                        );
+
+
+        if(request.getUsername()!=null){
+
+            user.setUsername(
+                    request.getUsername()
+            );
+
+        }
+
+
+
+        if(request.getEmail()!=null){
+
+            user.setEmail(
+                    request.getEmail()
+            );
+
+        }
+
+
+
+        if(request.getPassword()!=null
+                &&
+                !request.getPassword().isBlank()){
+
+
+            user.setPassword(
+
+                    passwordEncoder.encode(
+                            request.getPassword()
+                    )
+
+            );
+
+        }
+
+
+
+        return mapper.toResponse(
+
+                userRepository.save(user)
+
+        );
+
+    }
+
+
+
+
+
+
+
+
+
+    /*
+        CHANGE ROLE
+     */
+
     public UserResponse updateRole(
             UUID id,
             UpdateRoleRequest request
     ){
-
 
         User user =
                 userRepository.findById(id)
@@ -152,17 +265,31 @@ public class UserService {
 
 
 
+        String roleName =
+                request.getRole()
+                        .replace(
+                                "ROLE_",
+                                ""
+                        )
+                        .toUpperCase();
+
+
+
         Role role =
+
                 roleRepository.findByName(
-                                request.getRole()
-                                        .toUpperCase()
+                                roleName
                         )
 
                         .orElseThrow(
+
                                 () -> new RuntimeException(
-                                        "Role not found"
+                                        "Role not found: "
+                                                + roleName
                                 )
+
                         );
+
 
 
         user.setRole(role);
@@ -170,13 +297,24 @@ public class UserService {
 
 
         return mapper.toResponse(
+
                 userRepository.save(user)
+
         );
 
     }
 
 
 
+
+
+
+
+
+
+    /*
+        DELETE USER
+     */
 
     public void delete(
             UUID id
@@ -185,6 +323,7 @@ public class UserService {
 
         if(!userRepository.existsById(id)){
 
+
             throw new RuntimeException(
                     "User not found"
             );
@@ -192,7 +331,9 @@ public class UserService {
         }
 
 
+
         userRepository.deleteById(id);
+
 
     }
 

@@ -7,7 +7,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import com.alaaturki.novadesk.dto.dashboard.DashboardUserResponse;
-
+import com.alaaturki.novadesk.entity.User;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 public interface UserRepository
@@ -16,7 +17,7 @@ public interface UserRepository
     Optional<User> findByEmail(String email);
 
     Optional<User> findByUsername(String username);
-
+    long countByRole_Name(String roleName);
     boolean existsByEmail(String email);
 
     boolean existsByUsername(String username);

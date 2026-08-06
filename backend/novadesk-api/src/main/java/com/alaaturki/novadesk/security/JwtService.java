@@ -3,20 +3,16 @@ package com.alaaturki.novadesk.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
-
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 
 import javax.crypto.SecretKey;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Function;
 
 
@@ -25,70 +21,35 @@ import java.util.function.Function;
 public class JwtService {
 
 
-    @Value("${jwt.secret}")
-    private String jwtSecret;
 
-
-    @Value("${jwt.expiration}")
-    private long jwtExpiration;
+    private static final String SECRET_KEY =
+            "bXktc3VwZXItc2VjcmV0LWtleS1mb3Itbm92YWRlc2stand3Z3d3Z3d3Z3d3";
 
 
 
-    public String extractUsername(String token){
+    private SecretKey getSignKey(){
 
-        return extractClaim(
-                token,
-                Claims::getSubject
-        );
+        byte[] keyBytes =
+                Decoders.BASE64.decode(SECRET_KEY);
+
+
+        return Keys.hmacShaKeyFor(keyBytes);
 
     }
 
 
-
-
-    public <T> T extractClaim(
-            String token,
-            Function<Claims,T> resolver
-    ){
-
-        Claims claims =
-                extractAllClaims(token);
-
-
-        return resolver.apply(claims);
-
-    }
-
-
-
-
-    public String generateToken(
-            UserDetails userDetails
-    ){
-
-
-        return generateToken(
-                new HashMap<>(),
-                userDetails
-        );
-
-    }
 
 
 
 
 
     public String generateToken(
-            Map<String,Object> extraClaims,
             UserDetails userDetails
     ){
 
 
         return Jwts.builder()
 
-                .claims(extraClaims)
-
-                // HERE WILL BE EMAIL
                 .subject(
                         userDetails.getUsername()
                 )
@@ -101,12 +62,12 @@ public class JwtService {
                         new Date(
                                 System.currentTimeMillis()
                                         +
-                                        jwtExpiration
+                                        1000 * 60 * 60 * 24
                         )
                 )
 
                 .signWith(
-                        getSigningKey()
+                        getSignKey()
                 )
 
                 .compact();
@@ -117,35 +78,65 @@ public class JwtService {
 
 
 
-    public boolean isTokenValid(
+
+
+
+    public String extractUsername(
+            String token
+    ){
+
+        return extractClaim(
+                token,
+                Claims::getSubject
+        );
+
+    }
+
+
+
+
+
+
+
+    public boolean isValid(
             String token,
             UserDetails userDetails
     ){
 
 
-        String username =
+        final String username =
                 extractUsername(token);
+
 
 
         return username.equals(
                 userDetails.getUsername()
         )
                 &&
-                !isTokenExpired(token);
+                !isExpired(token);
+
 
     }
 
 
 
 
-    private boolean isTokenExpired(
+
+
+
+
+    private boolean isExpired(
             String token
     ){
 
         return extractExpiration(token)
-                .before(new Date());
+                .before(
+                        new Date()
+                );
 
     }
+
+
 
 
 
@@ -166,6 +157,32 @@ public class JwtService {
 
 
 
+
+
+
+    public <T> T extractClaim(
+            String token,
+            Function<Claims,T> resolver
+    ){
+
+
+        final Claims claims =
+                extractAllClaims(token);
+
+
+        return resolver.apply(
+                claims
+        );
+
+    }
+
+
+
+
+
+
+
+
     private Claims extractAllClaims(
             String token
     ){
@@ -174,32 +191,20 @@ public class JwtService {
         return Jwts.parser()
 
                 .verifyWith(
-                        getSigningKey()
+                        getSignKey()
                 )
 
                 .build()
 
-                .parseSignedClaims(token)
+                .parseSignedClaims(
+                        token
+                )
 
                 .getPayload();
 
-    }
-
-
-
-
-
-    private SecretKey getSigningKey(){
-
-
-        return Keys.hmacShaKeyFor(
-
-                jwtSecret.getBytes(
-                        StandardCharsets.UTF_8
-                )
-
-        );
 
     }
+
+
 
 }

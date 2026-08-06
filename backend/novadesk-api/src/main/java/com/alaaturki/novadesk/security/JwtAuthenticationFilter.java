@@ -14,13 +14,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
 import org.springframework.stereotype.Component;
 
+
 import org.springframework.web.filter.OncePerRequestFilter;
+
 
 
 import java.io.IOException;
@@ -36,51 +37,32 @@ public class JwtAuthenticationFilter
 
     private final JwtService jwtService;
 
+
     private final UserDetailsService userDetailsService;
+
+
+
+
 
 
 
     @Override
     protected void doFilterInternal(
-
             HttpServletRequest request,
-
             HttpServletResponse response,
-
             FilterChain filterChain
-
 
     ) throws ServletException, IOException {
 
 
 
-        if(
-                request.getServletPath()
-                        .startsWith("/api/auth")
-        ){
-
-            filterChain.doFilter(
-                    request,
-                    response
-            );
-
-            return;
-
-        }
-
-
-
-
         String authHeader =
-                request.getHeader(
-                        "Authorization"
-                );
+                request.getHeader("Authorization");
 
 
 
         if(
-                authHeader == null
-                        ||
+                authHeader == null ||
                         !authHeader.startsWith("Bearer ")
         ){
 
@@ -96,19 +78,21 @@ public class JwtAuthenticationFilter
 
 
 
-        String jwt =
+
+        String token =
                 authHeader.substring(7);
 
 
 
-        String email =
-                jwtService.extractUsername(jwt);
+        String username =
+                jwtService.extractUsername(token);
+
+
 
 
 
         if(
-                email != null
-                        &&
+                username != null &&
                         SecurityContextHolder
                                 .getContext()
                                 .getAuthentication()
@@ -116,22 +100,25 @@ public class JwtAuthenticationFilter
         ){
 
 
+
             UserDetails userDetails =
                     userDetailsService
-                            .loadUserByUsername(email);
+                            .loadUserByUsername(
+                                    username
+                            );
 
 
 
             if(
-                    jwtService.isTokenValid(
-                            jwt,
+                    jwtService.isValid(
+                            token,
                             userDetails
                     )
             ){
 
 
-                UsernamePasswordAuthenticationToken authentication =
 
+                UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(
 
                                 userDetails,
@@ -144,26 +131,17 @@ public class JwtAuthenticationFilter
 
 
 
-                authentication.setDetails(
-
-                        new WebAuthenticationDetailsSource()
-
-                                .buildDetails(request)
-
-                );
-
-
-
                 SecurityContextHolder
-
                         .getContext()
-
-                        .setAuthentication(authentication);
-
+                        .setAuthentication(
+                                authToken
+                        );
 
             }
 
+
         }
+
 
 
 
@@ -172,6 +150,8 @@ public class JwtAuthenticationFilter
                 response
         );
 
+
     }
+
 
 }
