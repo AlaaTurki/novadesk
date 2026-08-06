@@ -1,40 +1,118 @@
-import { Injectable } from '@angular/core';
+import {
+Injectable
+} from '@angular/core';
 
-import { HttpClient } from '@angular/common/http';
 
-import { Observable } from 'rxjs';
+import {
+HttpClient
+} from '@angular/common/http';
 
-import { environment } from '../../../environments/environment';
 
-import { User } from '../models/user';
+import {
+User
+} from '../models/user';
+
+
 
 @Injectable({
-  providedIn: 'root'
+providedIn:'root'
 })
 export class UserService {
 
-  private api = environment.apiUrl + '/users';
 
-  constructor(
-    private http: HttpClient
-  ) { }
 
-  getAll(): Observable<User[]> {
+private api =
+'http://localhost:8080/api/users';
 
-    return this.http.get<User[]>(this.api);
 
-  }
 
-  getById(id: string): Observable<User> {
 
-    return this.http.get<User>(`${this.api}/${id}`);
+constructor(
+private http:HttpClient
+){}
 
-  }
 
-  delete(id: string): Observable<void> {
 
-    return this.http.delete<void>(`${this.api}/${id}`);
 
-  }
+
+
+getUsers(){
+
+return this.http.get<User[]>(
+this.api
+);
+
+}
+
+
+
+
+
+createUser(
+data:any
+){
+
+return this.http.post<User>(
+this.api,
+data
+);
+
+}
+
+
+
+
+
+updateUser(
+id:string,
+data:any
+){
+
+return this.http.put<User>(
+`${this.api}/${id}`,
+data
+);
+
+}
+
+
+
+
+
+updateRole(
+id:string,
+role:string
+){
+
+return this.http.patch<User>(
+
+`${this.api}/${id}/role`,
+
+{
+role:role
+}
+
+);
+
+}
+
+
+
+
+
+deleteUser(
+id:string
+){
+
+return this.http.delete(
+
+`${this.api}/${id}`
+
+);
+
+}
+
+
+
 
 }

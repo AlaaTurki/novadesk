@@ -1,11 +1,11 @@
 export interface User {
 
-  id: string;
+  id:string;
 
-  username: string;
+  username:string;
 
-  email: string;
+  email:string;
 
-  role: string;
+  role:string;
 
 }

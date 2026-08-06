@@ -1,154 +1,403 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-
-import { CommonModule } from '@angular/common';
-
-import { UserService } from '../../core/services/user';
-
-import { User } from '../../core/models/user';
-
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-
-import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
-
-import { MatSort, MatSortModule } from '@angular/material/sort';
-
-import { MatButtonModule } from '@angular/material/button';
-
-import { MatIconModule } from '@angular/material/icon';
-
-import { MatCardModule } from '@angular/material/card';
+import {
+Component,
+OnInit
+} from '@angular/core';
 
 
-import { MatInputModule } from '@angular/material/input';
 
-import { MatFormFieldModule } from '@angular/material/form-field';
+import {
+CommonModule
+} from '@angular/common';
 
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
+
+import {
+MatTableModule
+} from '@angular/material/table';
+
+
+
+import {
+MatButtonModule
+} from '@angular/material/button';
+
+
+
+import {
+MatDialog,
+MatDialogModule
+} from '@angular/material/dialog';
+
+
+
+import {
+UserService
+} from '../../core/services/user';
+
+
+
+import {
+User
+} from '../../core/models/user';
+
+
+
+import {
+EditUserDialog
+} from './edit-user-dialog';
+
+
+
+import {
+RoleDialog
+} from './role-dialog';
+
+
+
+import {
+ConfirmDialog
+} from '../../shared/confirm-dialog';
+
+
+
+import {
+CreateUserDialog
+} from './create-user-dialog/create-user-dialog';
+
+
+
+
 
 
 @Component({
-  selector: 'app-users',
 
-  standalone: true,
+selector:'app-users',
 
-  imports: [
+standalone:true,
 
-    CommonModule,
 
-    MatTableModule,
+imports:[
 
-    MatPaginatorModule,
+CommonModule,
 
-    MatSortModule,
+MatTableModule,
 
-    MatButtonModule,
+MatButtonModule,
 
-    MatIconModule,
+MatDialogModule
 
-    MatCardModule,
+],
 
-    MatProgressSpinnerModule,
-    MatFormFieldModule,
-    MatInputModule,
 
-  ],
 
-  templateUrl: './users.html',
+templateUrl:'./users.html',
 
-  styleUrl: './users.scss'
+
+styleUrl:'./users.scss'
+
 })
+
+
 export class Users implements OnInit {
 
-  displayedColumns: string[] = [
 
-    'username',
 
-    'email',
+users:User[]=[];
 
-    'role',
 
-    'actions'
 
-  ];
 
-  dataSource = new MatTableDataSource<User>();
+displayedColumns=[
 
-  loading = true;
+'username',
 
-  @ViewChild(MatPaginator)
-  paginator!: MatPaginator;
+'email',
 
-  @ViewChild(MatSort)
-  sort!: MatSort;
+'role',
 
-  constructor(
-    private userService: UserService
-  ) {}
+'actions'
 
-  ngOnInit(): void {
+];
 
-    this.loadUsers();
 
-  }
 
-  applyFilter(event: Event): void {
 
-  const filterValue = (event.target as HTMLInputElement).value;
 
-  this.dataSource.filter = filterValue.trim().toLowerCase();
 
-} 
 
-  loadUsers(): void {
+constructor(
 
-    this.loading = true;
+private userService:UserService,
 
-    this.userService.getAll().subscribe({
+private dialog:MatDialog
 
-      next: users => {
+){}
 
-        this.dataSource.data = users;
 
-        this.dataSource.paginator = this.paginator;
 
-        this.dataSource.sort = this.sort;
 
-        this.loading = false;
 
-      },
 
-      error: error => {
 
-        console.error(error);
 
-        this.loading = false;
+ngOnInit(){
 
-      }
+this.loadUsers();
 
-    });
+}
 
-  }
 
-  delete(id: string): void {
 
-    if (!confirm('Delete this user?')) {
 
-      return;
 
-    }
 
-    this.userService.delete(id).subscribe({
 
-      next: () => {
+loadUsers(){
 
-        this.loadUsers();
 
-      }
+this.userService
+.getUsers()
 
-    });
+.subscribe({
 
-    
+next:data=>{
 
-  }
+
+this.users=data;
+
+
+}
+
+
+});
+
+
+}
+
+
+
+
+
+
+
+
+
+create(){
+
+
+
+const dialogRef =
+
+this.dialog.open(
+
+CreateUserDialog,
+
+{
+
+width:'450px'
+
+}
+
+);
+
+
+
+
+
+dialogRef.afterClosed()
+
+.subscribe(result=>{
+
+
+
+if(result){
+
+
+
+this.userService
+
+.createUser(result)
+
+.subscribe(()=>{
+
+
+this.loadUsers();
+
+
+});
+
+
+
+}
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+edit(user:User){
+
+
+const dialogRef =
+
+this.dialog.open(
+
+EditUserDialog,
+
+{
+
+width:'450px',
+
+data:user
+
+}
+
+);
+
+
+
+
+dialogRef.afterClosed()
+
+.subscribe(()=>{
+
+
+this.loadUsers();
+
+
+});
+
+
+}
+
+
+
+
+
+
+
+
+
+manageRole(user:User){
+
+
+const dialogRef =
+
+this.dialog.open(
+
+RoleDialog,
+
+{
+
+width:'350px',
+
+data:user
+
+}
+
+);
+
+
+
+
+dialogRef.afterClosed()
+
+.subscribe(()=>{
+
+
+this.loadUsers();
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+delete(user:User){
+
+
+
+const dialogRef =
+
+this.dialog.open(
+
+ConfirmDialog,
+
+{
+
+width:'350px',
+
+data:{
+
+title:'Delete User',
+
+message:
+`Delete ${user.username}?`
+
+}
+
+}
+
+);
+
+
+
+
+
+
+dialogRef.afterClosed()
+
+.subscribe(result=>{
+
+
+if(result){
+
+
+
+this.userService
+
+.deleteUser(user.id)
+
+.subscribe(()=>{
+
+
+this.loadUsers();
+
+
+});
+
+
+}
+
+
+
+});
+
+
+
+}
+
+
+
 
 }

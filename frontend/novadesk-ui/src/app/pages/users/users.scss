@@ -1,17 +1,27 @@
-.toolbar{
+.form{
 
-    display:flex;
+display:flex;
 
-    justify-content:space-between;
+gap:20px;
 
-    align-items:center;
+align-items:center;
 
-    margin-bottom:20px;
+margin-bottom:30px;
+
+flex-wrap:wrap;
 
 }
 
+
+table{
+
+width:100%;
+
+}
+
+
 mat-form-field{
 
-    width:350px;
+width:220px;
 
 }

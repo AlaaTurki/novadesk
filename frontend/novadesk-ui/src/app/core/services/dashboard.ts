@@ -1,47 +1,77 @@
 import { Injectable } from '@angular/core';
 
-import { HttpClient } from '@angular/common/http';
 
-import { Observable } from 'rxjs';
+import {
+  HttpClient
+} from '@angular/common/http';
 
 
-import { environment } from '../../../environments/environment';
+import {
+  Observable
+} from 'rxjs';
 
-import { DashboardUser } from '../models/dashboard-user';
+
+import {
+  environment
+} from '../../../environments/environment';
+
+
+import {
+  DashboardUser
+} from '../models/dashboard-user';
+
+
+import {
+  DashboardStats
+} from '../models/dashboard-stats';
 
 
 
 @Injectable({
-providedIn:'root'
+  providedIn:'root'
 })
 export class DashboardService {
 
 
 
-private api =
-environment.apiUrl + '/dashboard';
+  private api =
+    environment.apiUrl + '/dashboard';
 
 
 
-constructor(
-private http:HttpClient
-){}
+  constructor(
+    private http: HttpClient
+  ){}
+
+
+
+  getUsers(): Observable<DashboardUser[]> {
+
+
+    return this.http.get<DashboardUser[]>(
+
+      `${this.api}/users`
+
+    );
+
+
+  }
 
 
 
 
-getUsers():Observable<DashboardUser[]> {
+
+  getStats(): Observable<DashboardStats> {
 
 
-return this.http.get<DashboardUser[]>(
+    return this.http.get<DashboardStats>(
 
-`${this.api}/users`
+      `${this.api}/stats`
 
-);
+    );
 
 
-}
-
+  }
 
 
 }
